@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ƒ}ƒ‹ƒ`ƒXƒgƒŠ[ƒ€•ƒrƒfƒIƒvƒŒƒCƒ„[</title>
+    <title>ãƒãƒ«ãƒã‚¹ãƒˆãƒªãƒ¼ãƒ ï¼†ãƒ“ãƒ‡ã‚ªãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼</title>
     
-    <!-- PWAƒ}ƒjƒtƒFƒXƒg‚Ì“Ç‚İ‚İ -->
+    <!-- PWAãƒãƒ‹ãƒ•ã‚§ã‚¹ãƒˆã®èª­ã¿è¾¼ã¿ -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
     <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIGZpbGw9IiMwZjE3MmEiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjAwIiBmaWxsPSIjYzgxNWE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjM1ZW0iPk1WPC90ZXh0Pjwvc3ZnPg==">
@@ -15,12 +15,12 @@
     <!-- Lucide Icons for touch-friendly buttons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* ƒ^ƒbƒ`ƒfƒoƒCƒX‚Å‚Ì•s—v‚ÈƒnƒCƒ‰ƒCƒg‚âƒXƒNƒ[ƒ‹‚Ì’²® */
+        /* ã‚¿ãƒƒãƒãƒ‡ãƒã‚¤ã‚¹ã§ã®ä¸è¦ãªãƒã‚¤ãƒ©ã‚¤ãƒˆã‚„ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ã®èª¿æ•´ */
         body {
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: contain;
         }
-        /* ƒAƒXƒyƒNƒg”ä16:9‚ğˆÛ‚·‚é‚½‚ß‚Ìƒ‰ƒbƒp[ */
+        /* ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”16:9ã‚’ç¶­æŒã™ã‚‹ãŸã‚ã®ãƒ©ãƒƒãƒ‘ãƒ¼ */
         .video-container {
             position: relative;
             width: 100%;
@@ -35,7 +35,7 @@
             border: 0;
         }
         
-        /* ƒtƒ‹ƒXƒNƒŠ[ƒ“‚ÌƒXƒ^ƒCƒ‹ */
+        /* ãƒ•ãƒ«ã‚¹ã‚¯ãƒªãƒ¼ãƒ³æ™‚ã®ã‚¹ã‚¿ã‚¤ãƒ« */
         :fullscreen header,
         :fullscreen #controlPanel,
         :fullscreen #presetSection,
@@ -52,20 +52,20 @@
             padding: 1rem !important;
             padding-bottom: 1rem !important;
         }
-        /* iOS‚È‚Çƒtƒ‹ƒXƒNƒŠ[ƒ“API”ñ‘Î‰ŠÂ‹«Œü‚¯‚Ì‹^—ƒtƒ‹ƒXƒNƒŠ[ƒ“ */
+        /* iOSãªã©ãƒ•ãƒ«ã‚¹ã‚¯ãƒªãƒ¼ãƒ³APIéå¯¾å¿œç’°å¢ƒå‘ã‘ã®ç–‘ä¼¼ãƒ•ãƒ«ã‚¹ã‚¯ãƒªãƒ¼ãƒ³ */
         body.pseudo-fullscreen {
             position: fixed;
             inset: 0;
             z-index: 9999;
             overflow-y: auto;
-            background-color: #020617; /* bg-slate-950‘Š“– */
+            background-color: #020617; /* bg-slate-950ç›¸å½“ */
         }
 
-        /* ƒXƒ}ƒzc‰æ–ÊƒtƒBƒbƒgƒ‚[ƒhi—]”’ƒ[ƒjê—pƒXƒ^ƒCƒ‹ */
+        /* ã‚¹ãƒãƒ›ç¸¦ç”»é¢ãƒ•ã‚£ãƒƒãƒˆãƒ¢ãƒ¼ãƒ‰ï¼ˆä½™ç™½ã‚¼ãƒ­ï¼‰å°‚ç”¨ã‚¹ã‚¿ã‚¤ãƒ« */
         :fullscreen main.mobile-fit,
         body.pseudo-fullscreen main.mobile-fit {
             padding: 0 !important;
-            padding-top: env(safe-area-inset-top) !important; /* iPhone‚Ìƒmƒbƒ`‘Î‰ */
+            padding-top: env(safe-area-inset-top) !important; /* iPhoneã®ãƒãƒƒãƒå¯¾å¿œ */
         }
         .mobile-stack-mode {
             gap: 2px !important;
@@ -85,7 +85,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
 
-    <!-- ƒwƒbƒ_[ -->
+    <!-- ãƒ˜ãƒƒãƒ€ãƒ¼ -->
     <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 sticky top-0 z-50 shadow-md">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
             <div class="flex items-center space-x-2">
@@ -97,28 +97,28 @@
             <div class="flex items-center space-x-2">
                 <button id="addPlayerBtn" class="bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center space-x-1 shadow-lg shadow-indigo-900/40">
                     <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-                    <span>”zM‚ğ’Ç‰Á</span>
+                    <span>é…ä¿¡ã‚’è¿½åŠ </span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- ƒƒCƒ“ƒRƒ“ƒeƒ“ƒc -->
+    <!-- ãƒ¡ã‚¤ãƒ³ã‚³ãƒ³ãƒ†ãƒ³ãƒ„ -->
     <main id="mainContent" class="flex-1 max-w-6xl w-full mx-auto px-4 py-4 flex flex-col space-y-6 pb-24 transition-all duration-300">
         
-        <!-- ƒRƒ“ƒgƒ[ƒ‹ƒpƒlƒ‹ (”zM’Ç‰Á/•ÒWƒtƒH[ƒ€) -->
+        <!-- ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ãƒ‘ãƒãƒ« (é…ä¿¡è¿½åŠ /ç·¨é›†ãƒ•ã‚©ãƒ¼ãƒ ) -->
         <section id="controlPanel" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl hidden">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-sm font-semibold text-slate-300 flex items-center space-x-1.5">
                     <i data-lucide="settings" class="w-4 h-4 text-indigo-400"></i>
-                    <span>ƒvƒŒƒCƒ„[‚ğV‹K’Ç‰Á</span>
+                    <span>ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’æ–°è¦è¿½åŠ </span>
                 </h2>
                 <button id="closeControlPanel" class="text-slate-400 hover:text-slate-200 p-1">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <!-- ƒvƒ‰ƒbƒgƒtƒH[ƒ€‘I‘ğ -->
+            <!-- ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ é¸æŠ -->
             <div class="grid grid-cols-2 gap-2 mb-4">
                 <button id="selectYoutube" class="py-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-950/40 text-slate-100 text-sm font-medium flex items-center justify-center space-x-2 transition-all">
                     <i data-lucide="youtube" class="w-5 h-5 text-red-500"></i>
@@ -130,125 +130,125 @@
                 </button>
             </div>
 
-            <!-- “ü—ÍƒtƒH[ƒ€ -->
+            <!-- å…¥åŠ›ãƒ•ã‚©ãƒ¼ãƒ  -->
             <div class="space-y-3">
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1" id="inputLabel">YouTube‚Ì‹¤—LƒeƒLƒXƒg ‚Ü‚½‚Í URL</label>
-                    <textarea id="streamInput" rows="2" placeholder="“®‰æ‚ÌURL‚â‹¤—LƒeƒLƒXƒg‚ğ“\‚è•t‚¯‚Ä‚­‚¾‚³‚¢" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition resize-none"></textarea>
+                    <label class="block text-xs text-slate-400 mb-1" id="inputLabel">YouTubeã®å…±æœ‰ãƒ†ã‚­ã‚¹ãƒˆ ã¾ãŸã¯ URL</label>
+                    <textarea id="streamInput" rows="2" placeholder="å‹•ç”»ã®URLã‚„å…±æœ‰ãƒ†ã‚­ã‚¹ãƒˆã‚’è²¼ã‚Šä»˜ã‘ã¦ãã ã•ã„" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition resize-none"></textarea>
                 </div>
                 
-                <!-- ƒIƒvƒVƒ‡ƒ“İ’è (Twitch—p) -->
+                <!-- ã‚ªãƒ—ã‚·ãƒ§ãƒ³è¨­å®š (Twitchç”¨) -->
                 <div id="twitchOptions" class="hidden">
-                    <label class="block text-xs text-slate-400 mb-1">”zMƒ^ƒCƒviURL©“®”»•Ê‰Â”\j</label>
+                    <label class="block text-xs text-slate-400 mb-1">é…ä¿¡ã‚¿ã‚¤ãƒ—ï¼ˆURLè‡ªå‹•åˆ¤åˆ¥å¯èƒ½ï¼‰</label>
                     <div class="flex space-x-2">
-                        <button id="twitchTypeLive" class="flex-1 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white">¶”zM</button>
-                        <button id="twitchTypeVod" class="flex-1 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400">ƒA[ƒJƒCƒu(VOD)</button>
+                        <button id="twitchTypeLive" class="flex-1 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white">ç”Ÿé…ä¿¡</button>
+                        <button id="twitchTypeVod" class="flex-1 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400">ã‚¢ãƒ¼ã‚«ã‚¤ãƒ–(VOD)</button>
                     </div>
                 </div>
 
                 <div class="pt-2">
                     <button id="submitStream" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-xl text-sm transition active:scale-95">
-                        ƒvƒŒƒCƒ„[‚ğ¶¬
+                        ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’ç”Ÿæˆ
                     </button>
                 </div>
             </div>
         </section>
 
-        <!-- ƒOƒŠƒbƒh•\¦İ’è -->
+        <!-- ã‚°ãƒªãƒƒãƒ‰è¡¨ç¤ºè¨­å®š -->
         <section class="flex items-center justify-between">
             <div class="flex items-center space-x-2 text-xs text-slate-400">
                 <i data-lucide="layout" class="w-4 h-4"></i>
-                <span id="playerCountText">‹N“®’†‚ÌƒvƒŒƒCƒ„[: 0</span>
+                <span id="playerCountText">èµ·å‹•ä¸­ã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼: 0</span>
             </div>
             <div class="flex items-center space-x-1 bg-slate-900 p-1 rounded-lg border border-slate-800">
-                <button id="layoutSingle" class="p-1.5 rounded bg-indigo-600 text-white transition" title="ƒVƒAƒ^[•\¦i1—ñj">
+                <button id="layoutSingle" class="p-1.5 rounded bg-indigo-600 text-white transition" title="ã‚·ã‚¢ã‚¿ãƒ¼è¡¨ç¤ºï¼ˆ1åˆ—ï¼‰">
                     <i data-lucide="square" class="w-3.5 h-3.5"></i>
                 </button>
-                <button id="layoutGrid" class="p-1.5 rounded text-slate-400 hover:text-slate-200 transition" title="ƒOƒŠƒbƒh•\¦i2—ñj">
+                <button id="layoutGrid" class="p-1.5 rounded text-slate-400 hover:text-slate-200 transition" title="ã‚°ãƒªãƒƒãƒ‰è¡¨ç¤ºï¼ˆ2åˆ—ï¼‰">
                     <i data-lucide="grid" class="w-3.5 h-3.5"></i>
                 </button>
-                <button id="layoutTriple" class="p-1.5 rounded text-slate-400 hover:text-slate-200 transition hidden md:block" title="3—ñ•\¦iPCŒü‚¯j">
+                <button id="layoutTriple" class="p-1.5 rounded text-slate-400 hover:text-slate-200 transition hidden md:block" title="3åˆ—è¡¨ç¤ºï¼ˆPCå‘ã‘ï¼‰">
                     <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
                 </button>
-                <button id="layoutMobileStack" class="p-1.5 rounded text-slate-400 hover:text-slate-200 transition md:hidden" title="ƒXƒ}ƒzc‰æ–ÊƒtƒBƒbƒg">
+                <button id="layoutMobileStack" class="p-1.5 rounded text-slate-400 hover:text-slate-200 transition md:hidden" title="ã‚¹ãƒãƒ›ç¸¦ç”»é¢ãƒ•ã‚£ãƒƒãƒˆ">
                     <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
                 </button>
                 <div class="w-px h-4 bg-slate-700 mx-1"></div>
-                <button id="fullscreenBtn" class="p-1.5 rounded text-slate-400 hover:text-slate-200 transition" title="‘S‰æ–Ê•\¦iUI‚ğ‰B‚·j">
+                <button id="fullscreenBtn" class="p-1.5 rounded text-slate-400 hover:text-slate-200 transition" title="å…¨ç”»é¢è¡¨ç¤ºï¼ˆUIã‚’éš ã™ï¼‰">
                     <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
                 </button>
             </div>
         </section>
 
-        <!-- ƒvƒŒƒCƒ„[ƒRƒ“ƒeƒi -->
+        <!-- ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚³ãƒ³ãƒ†ãƒŠ -->
         <section id="playersGrid" class="grid grid-cols-1 gap-4 transition-all duration-300">
-            <!-- ƒvƒŒƒCƒ„[‚ª“®“I‚É’Ç‰Á‚³‚ê‚Ü‚· -->
+            <!-- ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒå‹•çš„ã«è¿½åŠ ã•ã‚Œã¾ã™ -->
             <div id="emptyState" class="col-span-full py-16 flex flex-col items-center justify-center text-center space-y-4 px-4 bg-slate-900/50 rounded-2xl border border-dashed border-slate-800">
                 <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center text-indigo-400">
                     <i data-lucide="video" class="w-8 h-8"></i>
                 </div>
                 <div>
-                    <h3 class="text-sm font-semibold text-slate-200">Ä¶’†‚ÌƒRƒ“ƒeƒ“ƒc‚Í‚ ‚è‚Ü‚¹‚ñ</h3>
-                    <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto">ã‚Ìu”zM‚ğ’Ç‰Ávƒ{ƒ^ƒ“‚©‚çAYouTube‚Ì“®‰æ‚âTwitch‚Ìƒ‰ƒCƒu”zM‚ğ’Ç‰Á‚µ‚Ü‚µ‚å‚¤B</p>
+                    <h3 class="text-sm font-semibold text-slate-200">å†ç”Ÿä¸­ã®ã‚³ãƒ³ãƒ†ãƒ³ãƒ„ã¯ã‚ã‚Šã¾ã›ã‚“</h3>
+                    <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto">ä¸Šã®ã€Œé…ä¿¡ã‚’è¿½åŠ ã€ãƒœã‚¿ãƒ³ã‹ã‚‰ã€YouTubeã®å‹•ç”»ã‚„Twitchã®ãƒ©ã‚¤ãƒ–é…ä¿¡ã‚’è¿½åŠ ã—ã¾ã—ã‚‡ã†ã€‚</p>
                 </div>
                 <button onclick="document.getElementById('controlPanel').classList.remove('hidden');" class="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 px-4 py-2 rounded-full text-xs font-semibold transition">
-                    Å‰‚Ì”zM‚ğ’Ç‰Á‚·‚é
+                    æœ€åˆã®é…ä¿¡ã‚’è¿½åŠ ã™ã‚‹
                 </button>
             </div>
         </section>
 
-        <!-- ‚¨‹C‚É“ü‚è/ƒvƒŠƒZƒbƒgƒZƒNƒVƒ‡ƒ“ -->
+        <!-- ãŠæ°—ã«å…¥ã‚Š/ãƒ—ãƒªã‚»ãƒƒãƒˆã‚»ã‚¯ã‚·ãƒ§ãƒ³ -->
         <section id="presetSection" class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4">
             <h2 class="text-sm font-semibold text-slate-300 mb-3 flex items-center space-x-1.5">
                 <i data-lucide="bookmark" class="w-4 h-4 text-amber-500"></i>
-                <span>‚¨‹C‚É“ü‚èƒŠƒXƒg / ƒNƒCƒbƒN‹N“®</span>
+                <span>ãŠæ°—ã«å…¥ã‚Šãƒªã‚¹ãƒˆ / ã‚¯ã‚¤ãƒƒã‚¯èµ·å‹•</span>
             </h2>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="presetContainer">
-                <!-- ƒvƒŠƒZƒbƒg‚ª‚±‚±‚É•\¦‚³‚ê‚Ü‚· -->
+                <!-- ãƒ—ãƒªã‚»ãƒƒãƒˆãŒã“ã“ã«è¡¨ç¤ºã•ã‚Œã¾ã™ -->
             </div>
             
             <div class="mt-4 pt-3 border-t border-slate-800/80 flex flex-col space-y-2">
                 <p class="text-[10px] text-slate-500 leading-relaxed">
-                    ¦ ‹¤—Lƒ{ƒ^ƒ“‚©‚çƒRƒs[‚µ‚½u‚¢‚Á‚µ‚å‚ÉŒ©‚Ü‚µ‚å‚¤ https://...v‚È‚Ç‚ÌƒeƒLƒXƒg‚à‚»‚Ì‚Ü‚Ü“\‚è•t‚¯‰Â”\‚Å‚·B<br>
-                    ¦ ƒT[ƒhƒp[ƒeƒBCookie‚Ìİ’è‚É‚æ‚èAƒvƒŒƒ~ƒAƒ€‰ïˆõ‚ÌL”ñ•\¦“™‚ª”½‰f‚³‚ê‚È‚¢ê‡‚ª‚ ‚è‚Ü‚·B
+                    â€» å…±æœ‰ãƒœã‚¿ãƒ³ã‹ã‚‰ã‚³ãƒ”ãƒ¼ã—ãŸã€Œã„ã£ã—ã‚‡ã«è¦‹ã¾ã—ã‚‡ã† https://...ã€ãªã©ã®ãƒ†ã‚­ã‚¹ãƒˆã‚‚ãã®ã¾ã¾è²¼ã‚Šä»˜ã‘å¯èƒ½ã§ã™ã€‚<br>
+                    â€» ã‚µãƒ¼ãƒ‰ãƒ‘ãƒ¼ãƒ†ã‚£Cookieã®è¨­å®šã«ã‚ˆã‚Šã€ãƒ—ãƒ¬ãƒŸã‚¢ãƒ ä¼šå“¡ã®åºƒå‘Šéè¡¨ç¤ºç­‰ãŒåæ˜ ã•ã‚Œãªã„å ´åˆãŒã‚ã‚Šã¾ã™ã€‚
                 </p>
             </div>
         </section>
 
     </main>
 
-    <!-- ƒNƒCƒbƒN•Û‘¶ƒ‚[ƒ_ƒ‹ -->
+    <!-- ã‚¯ã‚¤ãƒƒã‚¯ä¿å­˜ãƒ¢ãƒ¼ãƒ€ãƒ« -->
     <div id="savePresetModal" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-5 space-y-4">
             <h3 class="text-sm font-bold text-slate-200 flex items-center space-x-1.5">
                 <i data-lucide="bookmark-plus" class="w-4 h-4 text-indigo-400"></i>
-                <span>‚¨‹C‚É“ü‚è‚É’Ç‰Á</span>
+                <span>ãŠæ°—ã«å…¥ã‚Šã«è¿½åŠ </span>
             </h3>
             <div class="space-y-3 text-xs">
                 <div>
-                    <label class="block text-slate-400 mb-1">•\¦–¼i–¼‘Oj</label>
-                    <input type="text" id="presetNameInput" placeholder="‚¨‹C‚É“ü‚è‚Ì”zM" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
+                    <label class="block text-slate-400 mb-1">è¡¨ç¤ºåï¼ˆåå‰ï¼‰</label>
+                    <input type="text" id="presetNameInput" placeholder="ãŠæ°—ã«å…¥ã‚Šã®é…ä¿¡" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1">ƒvƒ‰ƒbƒgƒtƒH[ƒ€</label>
+                    <label class="block text-slate-400 mb-1">ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ </label>
                     <div class="grid grid-cols-2 gap-2">
                         <button id="modalPlatformYT" class="py-1.5 rounded bg-indigo-600 text-white font-medium">YouTube</button>
                         <button id="modalPlatformTwitch" class="py-1.5 rounded bg-slate-800 text-slate-400 font-medium">Twitch</button>
                     </div>
                 </div>
                 <div>
-                    <label class="block text-slate-400 mb-1">“®‰æID ‚Ü‚½‚Í ƒ`ƒƒƒ“ƒlƒ‹–¼</label>
-                    <input type="text" id="presetIdInput" placeholder="ID‚©ƒ`ƒƒƒ“ƒlƒ‹–¼‚ğ“ü—Í" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
+                    <label class="block text-slate-400 mb-1">å‹•ç”»ID ã¾ãŸã¯ ãƒãƒ£ãƒ³ãƒãƒ«å</label>
+                    <input type="text" id="presetIdInput" placeholder="IDã‹ãƒãƒ£ãƒ³ãƒãƒ«åã‚’å…¥åŠ›" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
                 </div>
             </div>
             <div class="flex space-x-2 pt-2 text-xs">
-                <button id="cancelSavePreset" class="flex-1 bg-slate-800 text-slate-300 py-2 rounded-xl">ƒLƒƒƒ“ƒZƒ‹</button>
-                <button id="confirmSavePreset" class="flex-1 bg-indigo-600 text-white py-2 rounded-xl font-semibold">•Û‘¶‚·‚é</button>
+                <button id="cancelSavePreset" class="flex-1 bg-slate-800 text-slate-300 py-2 rounded-xl">ã‚­ãƒ£ãƒ³ã‚»ãƒ«</button>
+                <button id="confirmSavePreset" class="flex-1 bg-indigo-600 text-white py-2 rounded-xl font-semibold">ä¿å­˜ã™ã‚‹</button>
             </div>
         </div>
     </div>
 
-    <!-- ƒ‚ƒoƒCƒ‹—pƒtƒ[ƒeƒBƒ“ƒO’Ç‰Áƒo[ -->
+    <!-- ãƒ¢ãƒã‚¤ãƒ«ç”¨ãƒ•ãƒ­ãƒ¼ãƒ†ã‚£ãƒ³ã‚°è¿½åŠ ãƒãƒ¼ -->
     <div class="fixed bottom-4 right-4 z-40 md:hidden">
         <button id="floatAddBtn" class="w-12 h-12 bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-900/50">
             <i data-lucide="plus" class="w-6 h-6"></i>
@@ -256,7 +256,7 @@
     </div>
 
     <script>
-        // --- Service Worker‚Ì“o˜^ ---
+        // --- Service Workerã®ç™»éŒ² ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
@@ -269,7 +269,7 @@
             });
         }
 
-        // --- ó‘ÔŠÇ— ---
+        // --- çŠ¶æ…‹ç®¡ç† ---
         let currentPlatform = 'youtube';
         let currentTwitchType = 'live';
         let activePlayers = [];
@@ -280,7 +280,7 @@
         let currentLayout = 'single';
         let modalSelectedPlatform = 'youtube';
 
-        // --- DOM‚ÌQÆ ---
+        // --- DOMã®å‚ç…§ ---
         const mainContent = document.getElementById('mainContent');
         const controlPanel = document.getElementById('controlPanel');
         const addPlayerBtn = document.getElementById('addPlayerBtn');
@@ -314,7 +314,7 @@
         const cancelSavePreset = document.getElementById('cancelSavePreset');
         const confirmSavePreset = document.getElementById('confirmSavePreset');
 
-        // --- ‰Šú‰» ---
+        // --- åˆæœŸåŒ– ---
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             loadPresetsFromStorage();
@@ -322,7 +322,7 @@
             updatePlayerCount();
         });
 
-        // --- ƒ[ƒJƒ‹ƒXƒgƒŒ[ƒW˜A“® ---
+        // --- ãƒ­ãƒ¼ã‚«ãƒ«ã‚¹ãƒˆãƒ¬ãƒ¼ã‚¸é€£å‹• ---
         function loadPresetsFromStorage() {
             const saved = localStorage.getItem('streamhub_presets');
             if (saved) {
@@ -336,7 +336,7 @@
             localStorage.setItem('streamhub_presets', JSON.stringify(presets));
         }
 
-        // --- ƒpƒlƒ‹EƒgƒOƒ‹‘€ì ---
+        // --- ãƒ‘ãƒãƒ«ãƒ»ãƒˆã‚°ãƒ«æ“ä½œ ---
         function toggleControlPanel() {
             controlPanel.classList.toggle('hidden');
             if (!controlPanel.classList.contains('hidden')) {
@@ -348,12 +348,12 @@
         floatAddBtn.addEventListener('click', toggleControlPanel);
         closeControlPanel.addEventListener('click', () => controlPanel.classList.add('hidden'));
 
-        // ƒvƒ‰ƒbƒgƒtƒH[ƒ€Ø‚è‘Ö‚¦
+        // ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ åˆ‡ã‚Šæ›¿ãˆ
         selectYoutube.addEventListener('click', () => {
             currentPlatform = 'youtube';
             selectYoutube.className = "py-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-950/40 text-slate-100 text-sm font-medium flex items-center justify-center space-x-2 transition-all";
             selectTwitch.className = "py-2.5 rounded-xl border-2 border-transparent bg-slate-800 text-slate-400 text-sm font-medium flex items-center justify-center space-x-2 transition-all";
-            inputLabel.textContent = "YouTube‚Ì‹¤—LƒeƒLƒXƒg ‚Ü‚½‚Í URL";
+            inputLabel.textContent = "YouTubeã®å…±æœ‰ãƒ†ã‚­ã‚¹ãƒˆ ã¾ãŸã¯ URL";
             twitchOptions.classList.add('hidden');
         });
 
@@ -361,7 +361,7 @@
             currentPlatform = 'twitch';
             selectTwitch.className = "py-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-950/40 text-slate-100 text-sm font-medium flex items-center justify-center space-x-2 transition-all";
             selectYoutube.className = "py-2.5 rounded-xl border-2 border-transparent bg-slate-800 text-slate-400 text-sm font-medium flex items-center justify-center space-x-2 transition-all";
-            inputLabel.textContent = "Twitch‚Ì‹¤—LƒeƒLƒXƒg ‚Ü‚½‚Í URL";
+            inputLabel.textContent = "Twitchã®å…±æœ‰ãƒ†ã‚­ã‚¹ãƒˆ ã¾ãŸã¯ URL";
             twitchOptions.classList.remove('hidden');
         });
 
@@ -377,36 +377,36 @@
             twitchTypeLive.className = "flex-1 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400";
         });
 
-        // --- ‹­—Í‚ÈURLEƒeƒLƒXƒg‰ğÍŠÖ” ---
+        // --- å¼·åŠ›ãªURLãƒ»ãƒ†ã‚­ã‚¹ãƒˆè§£æé–¢æ•° ---
         function extractYoutubeId(urlOrId) {
-            // ‰üs‚â“ú–{Œê‚ªŠÜ‚Ü‚ê‚éƒeƒLƒXƒg‚Ì’†‚©‚çURL•”•ª‚ğ“Á’è‚µAID‚ğ”²‚«o‚·
+            // æ”¹è¡Œã‚„æ—¥æœ¬èªãŒå«ã¾ã‚Œã‚‹ãƒ†ã‚­ã‚¹ãƒˆã®ä¸­ã‹ã‚‰URLéƒ¨åˆ†ã‚’ç‰¹å®šã—ã€IDã‚’æŠœãå‡ºã™
             const regExp = /[\s\S]*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|live\/|shorts\/)([^#\&\?\s]*).*/;
             const match = urlOrId.match(regExp);
             if (match && match[2].length === 11) {
                 return match[2];
             }
-            // ƒ}ƒbƒ`‚µ‚È‚¢ê‡‚Í—]Œv‚È‹ó”’‚ğÁ‚µ‚Ä‚»‚Ì‚Ü‚Ü•Ô‚·
+            // ãƒãƒƒãƒã—ãªã„å ´åˆã¯ä½™è¨ˆãªç©ºç™½ã‚’æ¶ˆã—ã¦ãã®ã¾ã¾è¿”ã™
             return urlOrId.trim();
         }
 
         function extractTwitchInfo(urlOrId, currentType) {
-            // VOD‚ÌURL‚ğŒŸ’m (—á: twitch.tv/videos/12345678)
+            // VODã®URLã‚’æ¤œçŸ¥ (ä¾‹: twitch.tv/videos/12345678)
             const vodMatch = urlOrId.match(/twitch\.tv\/(?:videos\/|[^/]+\/video\/)(\d+)/);
             if (vodMatch) {
                 return { id: vodMatch[1], type: 'vod' };
             }
 
-            // ƒ‰ƒCƒu/ƒ`ƒƒƒ“ƒlƒ‹URL‚ğŒŸ’m (ƒNƒGƒŠƒpƒ‰ƒ[ƒ^“™‚ğœŠO‚µƒ`ƒƒƒ“ƒlƒ‹–¼‚¾‚¯’Šo)
+            // ãƒ©ã‚¤ãƒ–/ãƒãƒ£ãƒ³ãƒãƒ«URLã‚’æ¤œçŸ¥ (ã‚¯ã‚¨ãƒªãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ç­‰ã‚’é™¤å¤–ã—ãƒãƒ£ãƒ³ãƒãƒ«åã ã‘æŠ½å‡º)
             const liveMatch = urlOrId.match(/twitch\.tv\/([a-zA-Z0-9_]+)/);
             if (liveMatch && liveMatch[1] !== 'videos') {
                 return { id: liveMatch[1], type: 'live' };
             }
 
-            // URL‚ªŠÜ‚Ü‚ê‚È‚¢ê‡‚ÍAÅ‰‚Ì’PŒê‚ğID‚Æ‚µ‚Äˆµ‚¤i‹ó”’‚Å•ªŠ„j
+            // URLãŒå«ã¾ã‚Œãªã„å ´åˆã¯ã€æœ€åˆã®å˜èªã‚’IDã¨ã—ã¦æ‰±ã†ï¼ˆç©ºç™½ã§åˆ†å‰²ï¼‰
             return { id: urlOrId.trim().split(/\s+/)[0], type: currentType };
         }
 
-        // --- ƒvƒŒƒCƒ„[’Ç‰Áˆ— ---
+        // --- ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼è¿½åŠ å‡¦ç† ---
         submitStream.addEventListener('click', () => {
             const inputValue = streamInput.value.trim();
             if (!inputValue) return;
@@ -419,7 +419,7 @@
             } else if (currentPlatform === 'twitch') {
                 const info = extractTwitchInfo(inputValue, currentTwitchType);
                 sourceId = info.id;
-                finalTwitchType = info.type; // URL‚©‚ç”»•Ê‚µ‚½ƒ^ƒCƒv‚Åã‘‚«
+                finalTwitchType = info.type; // URLã‹ã‚‰åˆ¤åˆ¥ã—ãŸã‚¿ã‚¤ãƒ—ã§ä¸Šæ›¸ã
             }
 
             createPlayer(currentPlatform, sourceId, finalTwitchType);
@@ -482,10 +482,10 @@
                         <span class="text-slate-300 truncate font-mono select-all">${sourceId}</span>
                     </div>
                     <div class="flex items-center space-x-1 flex-shrink-0">
-                        <button onclick="saveCurrentToPresets('${platform}', '${sourceId}', '${twitchType}')" class="text-slate-400 hover:text-amber-400 p-1 transition" title="‚¨‹C‚É“ü‚è“o˜^">
+                        <button onclick="saveCurrentToPresets('${platform}', '${sourceId}', '${twitchType}')" class="text-slate-400 hover:text-amber-400 p-1 transition" title="ãŠæ°—ã«å…¥ã‚Šç™»éŒ²">
                             <i data-lucide="bookmark" class="w-4 h-4"></i>
                         </button>
-                        <button onclick="removePlayer('${playerId}')" class="text-slate-400 hover:text-red-400 p-1 transition" title="ƒvƒŒƒCƒ„[‚ğ•Â‚¶‚é">
+                        <button onclick="removePlayer('${playerId}')" class="text-slate-400 hover:text-red-400 p-1 transition" title="ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’é–‰ã˜ã‚‹">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </button>
                     </div>
@@ -511,7 +511,7 @@
         };
 
         function updatePlayerCount() {
-            playerCountText.textContent = `‹N“®’†‚ÌƒvƒŒƒCƒ„[: ${activePlayers.length}`;
+            playerCountText.textContent = `èµ·å‹•ä¸­ã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼: ${activePlayers.length}`;
             if (activePlayers.length === 0) {
                 emptyState.classList.remove('hidden');
             } else {
@@ -519,7 +519,7 @@
             }
         }
 
-        // --- ƒŒƒCƒAƒEƒg•ÏX ---
+        // --- ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆå¤‰æ›´ ---
         layoutSingle.addEventListener('click', () => {
             currentLayout = 'single';
             playersGrid.className = "grid grid-cols-1 gap-4 transition-all duration-300";
@@ -568,7 +568,7 @@
             }
         });
 
-        // --- ‘S‰æ–Ê•\¦‹@”\ ---
+        // --- å…¨ç”»é¢è¡¨ç¤ºæ©Ÿèƒ½ ---
         fullscreenBtn.addEventListener('click', () => {
             if (document.fullscreenEnabled) {
                 if (!document.fullscreenElement) {
@@ -605,14 +605,14 @@
             lucide.createIcons();
         }
 
-        // --- ‚¨‹C‚É“ü‚èƒvƒŠƒZƒbƒg•`‰æ ---
+        // --- ãŠæ°—ã«å…¥ã‚Šãƒ—ãƒªã‚»ãƒƒãƒˆæç”» ---
         function renderPresets() {
             presetContainer.innerHTML = '';
             const addNewPresetBtn = document.createElement('button');
             addNewPresetBtn.className = "flex flex-col items-center justify-center p-3 rounded-xl border border-dashed border-slate-800 bg-slate-900/20 hover:bg-slate-900/50 active:scale-95 transition text-slate-400 hover:text-indigo-400 space-y-1 min-h-[70px]";
             addNewPresetBtn.innerHTML = `
                 <i data-lucide="plus-circle" class="w-5 h-5"></i>
-                <span class="text-[10px] font-medium">’Ç‰Á‚·‚é</span>
+                <span class="text-[10px] font-medium">è¿½åŠ ã™ã‚‹</span>
             `;
             addNewPresetBtn.addEventListener('click', openSavePresetModalDirectly);
 
@@ -631,7 +631,7 @@
                         </span>
                         <h4 class="text-xs font-semibold text-slate-200 line-clamp-1 break-all">${p.name}</h4>
                     </div>
-                    <button onclick="deletePreset('${p.id}')" class="absolute top-2 right-2 text-slate-500 hover:text-red-400 p-1 rounded-lg transition" title="íœ">
+                    <button onclick="deletePreset('${p.id}')" class="absolute top-2 right-2 text-slate-500 hover:text-red-400 p-1 rounded-lg transition" title="å‰Šé™¤">
                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                     </button>
                 `;
@@ -660,7 +660,7 @@
         }
 
         window.saveCurrentToPresets = function(platform, sourceId, twitchType) {
-            presetNameInput.value = `${platform === 'youtube' ? 'YouTube' : 'Twitch'}‚ÌƒRƒ“ƒeƒ“ƒc`;
+            presetNameInput.value = `${platform === 'youtube' ? 'YouTube' : 'Twitch'}ã®ã‚³ãƒ³ãƒ†ãƒ³ãƒ„`;
             presetIdInput.value = sourceId;
             updateModalPlatform(platform);
             savePresetModal.classList.remove('hidden');
@@ -685,11 +685,11 @@
         });
 
         confirmSavePreset.addEventListener('click', () => {
-            const name = presetNameInput.value.trim() || '–³‘è‚Ì”zM';
+            const name = presetNameInput.value.trim() || 'ç„¡é¡Œã®é…ä¿¡';
             const sourceId = presetIdInput.value.trim();
 
             if (!sourceId) {
-                alert('ID‚Ü‚½‚Íƒ`ƒƒƒ“ƒlƒ‹–¼‚ğ“ü—Í‚µ‚Ä‚­‚¾‚³‚¢');
+                alert('IDã¾ãŸã¯ãƒãƒ£ãƒ³ãƒãƒ«åã‚’å…¥åŠ›ã—ã¦ãã ã•ã„');
                 return;
             }
 
