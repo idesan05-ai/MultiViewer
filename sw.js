@@ -1,10 +1,10 @@
-const CACHE_NAME = 'streamhub-cache-v1';
+const CACHE_NAME = 'streamhub-cache-v1.1';
 const urlsToCache = [
   './index.html',
   './manifest.json',
-  // Tailwind��Lucide��CDN����擾���邽�߃L���b�V���͕K�{�ł͂���܂��񂪁A
-  // ���S�ȃI�t���C���Ή���ڎw���ꍇ��CDN��URL��ǉ����邱�Ƃ��\�ł��B
-  // ����͍Œ���N���ɕK�v�ȃt�@�C���̂ݎw�肵�܂��B
+  // TailwindとLucideはCDNから取得するためキャッシュは必須ではありませんが、
+  // 完全なオフライン対応を目指す場合はCDNのURLを追加することも可能です。
+  // 今回は最低限起動に必要なファイルのみ指定します。
 ];
 
 self.addEventListener('install', event => {
@@ -20,7 +20,7 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // �L���b�V��������΂����Ԃ��A�Ȃ���΃l�b�g���[�N����擾
+        // キャッシュがあればそれを返し、なければネットワークから取得
         return response || fetch(event.request);
       })
   );
