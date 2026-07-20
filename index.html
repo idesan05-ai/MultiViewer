@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>マルチストリーム＆ビデオプレイヤー</title>
+    
+    <!-- PWAマニフェストの読み込み -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIGZpbGw9IiMwZjE3MmEiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjAwIiBmaWxsPSIjYzgxNWE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjM1ZW0iPk1WPC90ZXh0Pjwvc3ZnPg==">
+
+    <!-- Tailwind CSS for modern, clean UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons for touch-friendly buttons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* タッチデバイスでの不要なハイライトやスクロールの調整 */
+        body {
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: contain;
+        }
+        /* アスペクト比16:9を維持するためのラッパー */
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        
+        /* フルスクリーン時のスタイル */
+        :fullscreen header,
+        :fullscreen #controlPanel,
+        :fullscreen #presetSection,
+        :fullscreen .fixed.bottom-4,
+        body.pseudo-fullscreen header,
+        body.pseudo-fullscreen #controlPanel,
+        body.pseudo-fullscreen #presetSection,
+        body.pseudo-fullscreen .fixed.bottom-4 {
+            display: none !important;
+        }
+        :fullscreen main,
+        body.pseudo-fullscreen main {
+            max-width: 100% !important;
+            padding: 1rem !important;
+            padding-bottom: 1rem !important;
+        }
+        /* iOSなどフルスクリーンAPI非対応環境向けの疑似フルスクリーン */
+        body.pseudo-fullscreen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            overflow-y: auto;
+            background-color: #020617; /* bg-slate-950相当 */
+        }
+
+        /* スマホ縦画面フィットモード（余白ゼロ）専用スタイル */
+        :fullscreen main.mobile-fit,
+        body.pseudo-fullscreen main.mobile-fit {
+            padding: 0 !important;
+            padding-top: env(safe-area-inset-top) !important; /* iPhoneのノッチ対応 */
+        }
+        .mobile-stack-mode {
+            gap: 2px !important;
+        }
+        .mobile-stack-mode > div {
+            border-radius: 0 !important;
+            border-left: none !important;
+            border-right: none !important;
+            border-top: none !important;
+        }
+        .mobile-stack-mode .player-header {
+            padding-top: 0.25rem !important;
+            padding-bottom: 0.25rem !important;
+            background-color: #0f172a !important; /* bg-slate-900 */
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+
+    <!-- ヘッダー -->
+    <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 sticky top-0 z-50 shadow-md">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i data-lucide="play-circle" class="w-7 h-7 text-indigo-500"></i>
+                <h1 class="text-lg font-bold tracking-tight bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                    StreamHub Mobile
+                </h1>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="addPlayerBtn" class="bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition text-white px-3 py-1.5 rounded-full text-xs font-semibold flex items-center space-x-1 shadow-lg shadow-indigo-900/40">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    <span>配信を追加</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main id="mainContent" class="flex-1 max-w-6xl w-full mx-auto px-4 py-4 flex flex-col space-y-6 pb-24 transition-all duration-300">
+        
+        <!-- コントロールパネル (配信追加/編集フォーム) -->
+        <section id="controlPanel" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl hidden">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-sm font-semibold text-slate-300 flex items-center space-x-1.5">
+                    <i data-lucide="settings" class="w-4 h-4 text-indigo-400"></i>
+                    <span>プレイヤーを新規追加</span>
+                </h2>
+                <button id="closeControlPanel" class="text-slate-400 hover:text-slate-200 p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- プラットフォーム選択 -->
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <button id="selectYoutube" class="py-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-950/40 text-slate-100 text-sm font-medium flex items-center justify-center space-x-2 transition-all">
+                    <i data-lucide="youtube" class="w-5 h-5 text-red-500"></i>
+                    <span>YouTube</span>
+                </button>
+                <button id="selectTwitch" class="py-2.5 rounded-xl border-2 border-transparent bg-slate-800 text-slate-400 text-sm font-medium flex items-center justify-center space-x-2 transition-all">
+                    <i data-lucide="twitch" class="w-5 h-5 text-purple-400"></i>
+                    <span>Twitch</span>
+                </button>
+            </div>
+
+            <!-- 入力フォーム -->
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1" id="inputLabel">YouTubeの共有テキスト または URL</label>
+                    <textarea id="streamInput" rows="2" placeholder="動画のURLや共有テキストを貼り付けてください" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition resize-none"></textarea>
+                </div>
+                
+                <!-- オプション設定 (Twitch用) -->
+                <div id="twitchOptions" class="hidden">
+                    <label class="block text-xs text-slate-400 mb-1">配信タイプ（URL自動判別可能）</label>
+                    <div class="flex space-x-2">
+                        <button id="twitchTypeLive" class="flex-1 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white">生配信</button>
+                        <button id="twitchTypeVod" class="flex-1 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400">アーカイブ(VOD)</button>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button id="submitStream" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-xl text-sm transition active:scale-95">
+                        プレイヤーを生成
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- グリッド表示設定 -->
+        <section class="flex items-center justify-between">
+            <div class="flex items-center space-x-2 text-xs text-slate-400">
+                <i data-lucide="layout" class="w-4 h-4"></i>
+                <span id="playerCountText">起動中のプレイヤー: 0</span>
+            </div>
+            <div class="flex items-center space-x-1 bg-slate-900 p-1 rounded-lg border border-slate-800">
+                <button id="layoutSingle" class="p-1.5 rounded bg-indigo-600 text-white transition" title="シアター表示（1列）">
+                    <i data-lucide="square" class="w-3.5 h-3.5"></i>
+                </button>
+                <button id="layoutGrid" class="p-1.5 rounded text-slate-400 hover:text-slate-200 transition" title="グリッド表示（2列）">
+                    <i data-lucide="grid" class="w-3.5 h-3.5"></i>
+                </button>
+                <button id="layoutTriple" class="p-1.5 rounded text-slate-400 hover:text-slate-200 transition hidden md:block" title="3列表示（PC向け）">
+                    <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+                </button>
+                <button id="layoutMobileStack" class="p-1.5 rounded text-slate-400 hover:text-slate-200 transition md:hidden" title="スマホ縦画面フィット">
+                    <i data-lucide="smartphone" class="w-3.5 h-3.5"></i>
+                </button>
+                <div class="w-px h-4 bg-slate-700 mx-1"></div>
+                <button id="fullscreenBtn" class="p-1.5 rounded text-slate-400 hover:text-slate-200 transition" title="全画面表示（UIを隠す）">
+                    <i data-lucide="maximize" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- プレイヤーコンテナ -->
+        <section id="playersGrid" class="grid grid-cols-1 gap-4 transition-all duration-300">
+            <!-- プレイヤーが動的に追加されます -->
+            <div id="emptyState" class="col-span-full py-16 flex flex-col items-center justify-center text-center space-y-4 px-4 bg-slate-900/50 rounded-2xl border border-dashed border-slate-800">
+                <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center text-indigo-400">
+                    <i data-lucide="video" class="w-8 h-8"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-200">再生中のコンテンツはありません</h3>
+                    <p class="text-xs text-slate-500 mt-1 max-w-xs mx-auto">上の「配信を追加」ボタンから、YouTubeの動画やTwitchのライブ配信を追加しましょう。</p>
+                </div>
+                <button onclick="document.getElementById('controlPanel').classList.remove('hidden');" class="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 px-4 py-2 rounded-full text-xs font-semibold transition">
+                    最初の配信を追加する
+                </button>
+            </div>
+        </section>
+
+        <!-- お気に入り/プリセットセクション -->
+        <section id="presetSection" class="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4">
+            <h2 class="text-sm font-semibold text-slate-300 mb-3 flex items-center space-x-1.5">
+                <i data-lucide="bookmark" class="w-4 h-4 text-amber-500"></i>
+                <span>お気に入りリスト / クイック起動</span>
+            </h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="presetContainer">
+                <!-- プリセットがここに表示されます -->
+            </div>
+            
+            <div class="mt-4 pt-3 border-t border-slate-800/80 flex flex-col space-y-2">
+                <p class="text-[10px] text-slate-500 leading-relaxed">
+                    ※ 共有ボタンからコピーした「いっしょに見ましょう https://...」などのテキストもそのまま貼り付け可能です。<br>
+                    ※ サードパーティCookieの設定により、プレミアム会員の広告非表示等が反映されない場合があります。
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- クイック保存モーダル -->
+    <div id="savePresetModal" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-5 space-y-4">
+            <h3 class="text-sm font-bold text-slate-200 flex items-center space-x-1.5">
+                <i data-lucide="bookmark-plus" class="w-4 h-4 text-indigo-400"></i>
+                <span>お気に入りに追加</span>
+            </h3>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block text-slate-400 mb-1">表示名（名前）</label>
+                    <input type="text" id="presetNameInput" placeholder="お気に入りの配信" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">プラットフォーム</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="modalPlatformYT" class="py-1.5 rounded bg-indigo-600 text-white font-medium">YouTube</button>
+                        <button id="modalPlatformTwitch" class="py-1.5 rounded bg-slate-800 text-slate-400 font-medium">Twitch</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-slate-400 mb-1">動画ID または チャンネル名</label>
+                    <input type="text" id="presetIdInput" placeholder="IDかチャンネル名を入力" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500">
+                </div>
+            </div>
+            <div class="flex space-x-2 pt-2 text-xs">
+                <button id="cancelSavePreset" class="flex-1 bg-slate-800 text-slate-300 py-2 rounded-xl">キャンセル</button>
+                <button id="confirmSavePreset" class="flex-1 bg-indigo-600 text-white py-2 rounded-xl font-semibold">保存する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- モバイル用フローティング追加バー -->
+    <div class="fixed bottom-4 right-4 z-40 md:hidden">
+        <button id="floatAddBtn" class="w-12 h-12 bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-900/50">
+            <i data-lucide="plus" class="w-6 h-6"></i>
+        </button>
+    </div>
+
+    <script>
+        // --- Service Workerの登録 ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+        }
+
+        // --- 状態管理 ---
+        let currentPlatform = 'youtube';
+        let currentTwitchType = 'live';
+        let activePlayers = [];
+        let presets = [
+            { id: '1', name: 'Lofi Girl (YouTube)', platform: 'youtube', sourceId: 'jfKfPfyJRdk' },
+            { id: '2', name: 'TwitchJP (Twitch)', platform: 'twitch', sourceId: 'twitchjp', twitchType: 'live' }
+        ];
+        let currentLayout = 'single';
+        let modalSelectedPlatform = 'youtube';
+
+        // --- DOMの参照 ---
+        const mainContent = document.getElementById('mainContent');
+        const controlPanel = document.getElementById('controlPanel');
+        const addPlayerBtn = document.getElementById('addPlayerBtn');
+        const floatAddBtn = document.getElementById('floatAddBtn');
+        const closeControlPanel = document.getElementById('closeControlPanel');
+        const selectYoutube = document.getElementById('selectYoutube');
+        const selectTwitch = document.getElementById('selectTwitch');
+        const streamInput = document.getElementById('streamInput');
+        const inputLabel = document.getElementById('inputLabel');
+        const twitchOptions = document.getElementById('twitchOptions');
+        const twitchTypeLive = document.getElementById('twitchTypeLive');
+        const twitchTypeVod = document.getElementById('twitchTypeVod');
+        const submitStream = document.getElementById('submitStream');
+        const playersGrid = document.getElementById('playersGrid');
+        const emptyState = document.getElementById('emptyState');
+        const playerCountText = document.getElementById('playerCountText');
+        
+        const layoutSingle = document.getElementById('layoutSingle');
+        const layoutGrid = document.getElementById('layoutGrid');
+        const layoutTriple = document.getElementById('layoutTriple');
+        const layoutMobileStack = document.getElementById('layoutMobileStack');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        
+        const presetContainer = document.getElementById('presetContainer');
+
+        const savePresetModal = document.getElementById('savePresetModal');
+        const presetNameInput = document.getElementById('presetNameInput');
+        const presetIdInput = document.getElementById('presetIdInput');
+        const modalPlatformYT = document.getElementById('modalPlatformYT');
+        const modalPlatformTwitch = document.getElementById('modalPlatformTwitch');
+        const cancelSavePreset = document.getElementById('cancelSavePreset');
+        const confirmSavePreset = document.getElementById('confirmSavePreset');
+
+        // --- 初期化 ---
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            loadPresetsFromStorage();
+            renderPresets();
+            updatePlayerCount();
+        });
+
+        // --- ローカルストレージ連動 ---
+        function loadPresetsFromStorage() {
+            const saved = localStorage.getItem('streamhub_presets');
+            if (saved) {
+                try {
+                    presets = JSON.parse(saved);
+                } catch(e) {}
+            }
+        }
+
+        function savePresetsToStorage() {
+            localStorage.setItem('streamhub_presets', JSON.stringify(presets));
+        }
+
+        // --- パネル・トグル操作 ---
+        function toggleControlPanel() {
+            controlPanel.classList.toggle('hidden');
+            if (!controlPanel.classList.contains('hidden')) {
+                controlPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        addPlayerBtn.addEventListener('click', toggleControlPanel);
+        floatAddBtn.addEventListener('click', toggleControlPanel);
+        closeControlPanel.addEventListener('click', () => controlPanel.classList.add('hidden'));
+
+        // プラットフォーム切り替え
+        selectYoutube.addEventListener('click', () => {
+            currentPlatform = 'youtube';
+            selectYoutube.className = "py-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-950/40 text-slate-100 text-sm font-medium flex items-center justify-center space-x-2 transition-all";
+            selectTwitch.className = "py-2.5 rounded-xl border-2 border-transparent bg-slate-800 text-slate-400 text-sm font-medium flex items-center justify-center space-x-2 transition-all";
+            inputLabel.textContent = "YouTubeの共有テキスト または URL";
+            twitchOptions.classList.add('hidden');
+        });
+
+        selectTwitch.addEventListener('click', () => {
+            currentPlatform = 'twitch';
+            selectTwitch.className = "py-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-950/40 text-slate-100 text-sm font-medium flex items-center justify-center space-x-2 transition-all";
+            selectYoutube.className = "py-2.5 rounded-xl border-2 border-transparent bg-slate-800 text-slate-400 text-sm font-medium flex items-center justify-center space-x-2 transition-all";
+            inputLabel.textContent = "Twitchの共有テキスト または URL";
+            twitchOptions.classList.remove('hidden');
+        });
+
+        twitchTypeLive.addEventListener('click', () => {
+            currentTwitchType = 'live';
+            twitchTypeLive.className = "flex-1 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white";
+            twitchTypeVod.className = "flex-1 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400";
+        });
+
+        twitchTypeVod.addEventListener('click', () => {
+            currentTwitchType = 'vod';
+            twitchTypeVod.className = "flex-1 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white";
+            twitchTypeLive.className = "flex-1 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400";
+        });
+
+        // --- 強力なURL・テキスト解析関数 ---
+        function extractYoutubeId(urlOrId) {
+            // 改行や日本語が含まれるテキストの中からURL部分を特定し、IDを抜き出す
+            const regExp = /[\s\S]*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|live\/|shorts\/)([^#\&\?\s]*).*/;
+            const match = urlOrId.match(regExp);
+            if (match && match[2].length === 11) {
+                return match[2];
+            }
+            // マッチしない場合は余計な空白を消してそのまま返す
+            return urlOrId.trim();
+        }
+
+        function extractTwitchInfo(urlOrId, currentType) {
+            // VODのURLを検知 (例: twitch.tv/videos/12345678)
+            const vodMatch = urlOrId.match(/twitch\.tv\/(?:videos\/|[^/]+\/video\/)(\d+)/);
+            if (vodMatch) {
+                return { id: vodMatch[1], type: 'vod' };
+            }
+
+            // ライブ/チャンネルURLを検知 (クエリパラメータ等を除外しチャンネル名だけ抽出)
+            const liveMatch = urlOrId.match(/twitch\.tv\/([a-zA-Z0-9_]+)/);
+            if (liveMatch && liveMatch[1] !== 'videos') {
+                return { id: liveMatch[1], type: 'live' };
+            }
+
+            // URLが含まれない場合は、最初の単語をIDとして扱う（空白で分割）
+            return { id: urlOrId.trim().split(/\s+/)[0], type: currentType };
+        }
+
+        // --- プレイヤー追加処理 ---
+        submitStream.addEventListener('click', () => {
+            const inputValue = streamInput.value.trim();
+            if (!inputValue) return;
+
+            let sourceId = inputValue;
+            let finalTwitchType = currentTwitchType;
+
+            if (currentPlatform === 'youtube') {
+                sourceId = extractYoutubeId(inputValue);
+            } else if (currentPlatform === 'twitch') {
+                const info = extractTwitchInfo(inputValue, currentTwitchType);
+                sourceId = info.id;
+                finalTwitchType = info.type; // URLから判別したタイプで上書き
+            }
+
+            createPlayer(currentPlatform, sourceId, finalTwitchType);
+            streamInput.value = '';
+            controlPanel.classList.add('hidden');
+        });
+
+        function createPlayer(platform, sourceId, twitchType = 'live') {
+            const playerId = 'player_' + Date.now();
+            emptyState.classList.add('hidden');
+
+            const playerCard = document.createElement('div');
+            playerCard.id = playerId;
+            playerCard.className = "bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden flex flex-col shadow-lg transition-transform";
+
+            let iframeSrc = "";
+            let platformLabel = "";
+            let labelColor = "";
+
+            const currentHostname = window.location.hostname || "";
+            const currentHost = window.location.host || "";
+            let domains = ["localhost", "127.0.0.1", "gemini.google.com", "aistudio.google.com", "cdpn.io", "codepen.io"];
+            
+            if (currentHostname && !domains.includes(currentHostname)) domains.push(currentHostname);
+            if (currentHost && !domains.includes(currentHost)) {
+                const parts = currentHost.split(':');
+                if (parts[0] && !domains.includes(parts[0])) domains.push(parts[0]);
+            }
+
+            try {
+                if (window.location.ancestorOrigins) {
+                    for (let i = 0; i < window.location.ancestorOrigins.length; i++) {
+                        let h = new URL(window.location.ancestorOrigins[i]).hostname;
+                        if (h && !domains.includes(h)) domains.push(h);
+                    }
+                }
+            } catch(e) {}
+
+            let parentParams = domains.map(d => `parent=${encodeURIComponent(d)}`).join('&');
+
+            if (platform === 'youtube') {
+                iframeSrc = `https://www.youtube.com/embed/${sourceId}?rel=0&playsinline=1`;
+                platformLabel = "YouTube";
+                labelColor = "bg-red-500/20 text-red-400 border border-red-500/30";
+            } else if (platform === 'twitch') {
+                if (twitchType === 'live') {
+                    iframeSrc = `https://player.twitch.tv/?channel=${sourceId}&${parentParams}&autoplay=false&muted=false`;
+                    platformLabel = `Twitch (Live: ${sourceId})`;
+                } else {
+                    iframeSrc = `https://player.twitch.tv/?video=${sourceId}&${parentParams}&autoplay=false&muted=false`;
+                    platformLabel = `Twitch (VOD: ${sourceId})`;
+                }
+                labelColor = "bg-purple-500/20 text-purple-400 border border-purple-500/30";
+            }
+
+            playerCard.innerHTML = `
+                <div class="player-header px-3 py-2 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between text-xs transition-all">
+                    <div class="flex items-center space-x-2 overflow-hidden mr-2">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${labelColor} flex-shrink-0">${platformLabel}</span>
+                        <span class="text-slate-300 truncate font-mono select-all">${sourceId}</span>
+                    </div>
+                    <div class="flex items-center space-x-1 flex-shrink-0">
+                        <button onclick="saveCurrentToPresets('${platform}', '${sourceId}', '${twitchType}')" class="text-slate-400 hover:text-amber-400 p-1 transition" title="お気に入り登録">
+                            <i data-lucide="bookmark" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="removePlayer('${playerId}')" class="text-slate-400 hover:text-red-400 p-1 transition" title="プレイヤーを閉じる">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="video-container bg-black">
+                    <iframe src="${iframeSrc}" allowfullscreen="true" scrolling="no" allow="autoplay; encrypted-media; picture-in-picture"></iframe>
+                </div>
+            `;
+
+            playersGrid.appendChild(playerCard);
+            activePlayers.push({ id: playerId, platform, sourceId, twitchType });
+            updatePlayerCount();
+            lucide.createIcons();
+        }
+
+        window.removePlayer = function(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.remove();
+                activePlayers = activePlayers.filter(p => p.id !== id);
+            }
+            updatePlayerCount();
+        };
+
+        function updatePlayerCount() {
+            playerCountText.textContent = `起動中のプレイヤー: ${activePlayers.length}`;
+            if (activePlayers.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+        }
+
+        // --- レイアウト変更 ---
+        layoutSingle.addEventListener('click', () => {
+            currentLayout = 'single';
+            playersGrid.className = "grid grid-cols-1 gap-4 transition-all duration-300";
+            mainContent.classList.remove('mobile-fit');
+            
+            layoutSingle.className = "p-1.5 rounded bg-indigo-600 text-white transition";
+            layoutGrid.className = "p-1.5 rounded text-slate-400 hover:text-slate-200 transition";
+            layoutTriple.className = "p-1.5 rounded text-slate-400 hover:text-slate-200 transition hidden md:block";
+            layoutMobileStack.className = "p-1.5 rounded text-slate-400 hover:text-slate-200 transition md:hidden";
+        });
+
+        layoutGrid.addEventListener('click', () => {
+            currentLayout = 'grid';
+            playersGrid.className = "grid grid-cols-1 sm:grid-cols-2 gap-4 transition-all duration-300";
+            mainContent.classList.remove('mobile-fit');
+            
+            layoutGrid.className = "p-1.5 rounded bg-indigo-600 text-white transition";
+            layoutSingle.className = "p-1.5 rounded text-slate-400 hover:text-slate-200 transition";
+            layoutTriple.className = "p-1.5 rounded text-slate-400 hover:text-slate-200 transition hidden md:block";
+            layoutMobileStack.className = "p-1.5 rounded text-slate-400 hover:text-slate-200 transition md:hidden";
+        });
+
+        layoutTriple.addEventListener('click', () => {
+            currentLayout = 'triple';
+            playersGrid.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 transition-all duration-300";
+            mainContent.classList.remove('mobile-fit');
+            
+            layoutTriple.className = "p-1.5 rounded bg-indigo-600 text-white transition hidden md:block";
+            layoutSingle.className = "p-1.5 rounded text-slate-400 hover:text-slate-200 transition";
+            layoutGrid.className = "p-1.5 rounded text-slate-400 hover:text-slate-200 transition";
+            layoutMobileStack.className = "p-1.5 rounded text-slate-400 hover:text-slate-200 transition md:hidden";
+        });
+
+        layoutMobileStack.addEventListener('click', () => {
+            currentLayout = 'mobileStack';
+            playersGrid.className = "flex flex-col transition-all duration-300 mobile-stack-mode";
+            mainContent.classList.add('mobile-fit');
+            
+            layoutMobileStack.className = "p-1.5 rounded bg-indigo-600 text-white transition md:hidden";
+            layoutSingle.className = "p-1.5 rounded text-slate-400 hover:text-slate-200 transition";
+            layoutGrid.className = "p-1.5 rounded text-slate-400 hover:text-slate-200 transition";
+            layoutTriple.className = "p-1.5 rounded text-slate-400 hover:text-slate-200 transition hidden md:block";
+
+            if (!document.fullscreenElement && !document.body.classList.contains('pseudo-fullscreen')) {
+                togglePseudoFullscreen();
+            }
+        });
+
+        // --- 全画面表示機能 ---
+        fullscreenBtn.addEventListener('click', () => {
+            if (document.fullscreenEnabled) {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        togglePseudoFullscreen();
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            } else {
+                togglePseudoFullscreen();
+            }
+        });
+
+        function togglePseudoFullscreen() {
+            document.body.classList.toggle('pseudo-fullscreen');
+            updateFullscreenIcon(document.body.classList.contains('pseudo-fullscreen'));
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            updateFullscreenIcon(!!document.fullscreenElement);
+        });
+
+        function updateFullscreenIcon(isFullscreen) {
+            if (isFullscreen) {
+                fullscreenBtn.innerHTML = '<i data-lucide="minimize" class="w-3.5 h-3.5"></i>';
+                fullscreenBtn.classList.add('bg-indigo-600', 'text-white');
+                fullscreenBtn.classList.remove('text-slate-400');
+            } else {
+                fullscreenBtn.innerHTML = '<i data-lucide="maximize" class="w-3.5 h-3.5"></i>';
+                fullscreenBtn.classList.remove('bg-indigo-600', 'text-white');
+                fullscreenBtn.classList.add('text-slate-400');
+            }
+            lucide.createIcons();
+        }
+
+        // --- お気に入りプリセット描画 ---
+        function renderPresets() {
+            presetContainer.innerHTML = '';
+            const addNewPresetBtn = document.createElement('button');
+            addNewPresetBtn.className = "flex flex-col items-center justify-center p-3 rounded-xl border border-dashed border-slate-800 bg-slate-900/20 hover:bg-slate-900/50 active:scale-95 transition text-slate-400 hover:text-indigo-400 space-y-1 min-h-[70px]";
+            addNewPresetBtn.innerHTML = `
+                <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                <span class="text-[10px] font-medium">追加する</span>
+            `;
+            addNewPresetBtn.addEventListener('click', openSavePresetModalDirectly);
+
+            presets.forEach(p => {
+                const item = document.createElement('div');
+                item.className = "relative group bg-slate-900 border border-slate-800 rounded-xl p-3 flex flex-col justify-between hover:border-indigo-500/50 transition-all min-h-[70px]";
+                
+                const badgeColor = p.platform === 'youtube' ? 'bg-red-500/10 text-red-400' : 'bg-purple-500/10 text-purple-400';
+                const platformIcon = p.platform === 'youtube' ? 'youtube' : 'twitch';
+
+                item.innerHTML = `
+                    <div class="cursor-pointer flex-1" onclick="launchPreset('${p.platform}', '${p.sourceId}', '${p.twitchType || 'live'}')">
+                        <span class="px-1.5 py-0.5 rounded text-[8px] font-bold ${badgeColor} inline-flex items-center space-x-0.5 mb-1.5">
+                            <i data-lucide="${platformIcon}" class="w-2.5 h-2.5 mr-0.5"></i>
+                            ${p.platform.toUpperCase()}
+                        </span>
+                        <h4 class="text-xs font-semibold text-slate-200 line-clamp-1 break-all">${p.name}</h4>
+                    </div>
+                    <button onclick="deletePreset('${p.id}')" class="absolute top-2 right-2 text-slate-500 hover:text-red-400 p-1 rounded-lg transition" title="削除">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                `;
+                presetContainer.appendChild(item);
+            });
+
+            presetContainer.appendChild(addNewPresetBtn);
+            lucide.createIcons();
+        }
+
+        window.launchPreset = function(platform, sourceId, twitchType) {
+            createPlayer(platform, sourceId, twitchType);
+        };
+
+        window.deletePreset = function(id) {
+            presets = presets.filter(p => p.id !== id);
+            savePresetsToStorage();
+            renderPresets();
+        };
+
+        function openSavePresetModalDirectly() {
+            presetNameInput.value = '';
+            presetIdInput.value = '';
+            updateModalPlatform('youtube');
+            savePresetModal.classList.remove('hidden');
+        }
+
+        window.saveCurrentToPresets = function(platform, sourceId, twitchType) {
+            presetNameInput.value = `${platform === 'youtube' ? 'YouTube' : 'Twitch'}のコンテンツ`;
+            presetIdInput.value = sourceId;
+            updateModalPlatform(platform);
+            savePresetModal.classList.remove('hidden');
+        };
+
+        function updateModalPlatform(platform) {
+            modalSelectedPlatform = platform;
+            if (platform === 'youtube') {
+                modalPlatformYT.className = "py-1.5 rounded bg-indigo-600 text-white font-medium";
+                modalPlatformTwitch.className = "py-1.5 rounded bg-slate-800 text-slate-400 font-medium";
+            } else {
+                modalPlatformTwitch.className = "py-1.5 rounded bg-indigo-600 text-white font-medium";
+                modalPlatformYT.className = "py-1.5 rounded bg-slate-800 text-slate-400 font-medium";
+            }
+        }
+
+        modalPlatformYT.addEventListener('click', () => updateModalPlatform('youtube'));
+        modalPlatformTwitch.addEventListener('click', () => updateModalPlatform('twitch'));
+
+        cancelSavePreset.addEventListener('click', () => {
+            savePresetModal.classList.add('hidden');
+        });
+
+        confirmSavePreset.addEventListener('click', () => {
+            const name = presetNameInput.value.trim() || '無題の配信';
+            const sourceId = presetIdInput.value.trim();
+
+            if (!sourceId) {
+                alert('IDまたはチャンネル名を入力してください');
+                return;
+            }
+
+            presets.push({
+                id: Date.now().toString(),
+                name: name,
+                platform: modalSelectedPlatform,
+                sourceId: sourceId,
+                twitchType: modalSelectedPlatform === 'twitch' ? 'live' : undefined
+            });
+
+            savePresetsToStorage();
+            renderPresets();
+            savePresetModal.classList.add('hidden');
+        });
+
+    </script>
+</body>
+</html>
